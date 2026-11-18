@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Signal · V1 · Vallée</title>
+<style>
+:root{--sheet:#070c1a;--sheet-ink:#dfe7f6;--bg:#0a1226;--ink:#dfe7f6;--mute:#7f93b8;--ant:#38bdf8;--lit:#ffc46b;--off:#1e2b45;--ridge:#121e3a;--accent:#ffc46b;--gap:14px}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--sheet);color:var(--sheet-ink);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  -webkit-font-smoothing:antialiased}
+.mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;font-variant-numeric:tabular-nums}
+#fit{transform-origin:0 0}
+.board{width:1950px;padding:40px 36px 48px}
+.intro{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:40px;margin-bottom:28px;align-items:start}
+.intro h1{font-size:34px;font-weight:500;letter-spacing:-.03em;line-height:1.05}
+.intro .tag{font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:.6;margin-bottom:10px}
+.intro p{font-size:14px;line-height:1.55;opacity:.85;max-width:56ch}
+.sw{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.sw div{font-size:11px;line-height:1.35}
+.sw i{display:block;width:72px;height:40px;border-radius:6px;margin-bottom:6px;border:1px solid rgba(127,127,127,.3)}
+.frames{display:flex;gap:48px;align-items:flex-start}
+.flabel{font-size:12px;letter-spacing:.08em;text-transform:uppercase;opacity:.55;margin-bottom:10px}
+.frame{position:relative;overflow:hidden;border-radius:14px;box-shadow:0 0 0 1px rgba(127,127,127,.25)}
+.desk{width:1440px;height:900px}
+.mob{width:390px;height:844px;border-radius:44px;box-shadow:0 0 0 10px #111,0 0 0 11px rgba(127,127,127,.4)}
+.states{margin-top:36px}
+.states h2{font-size:12px;letter-spacing:.08em;text-transform:uppercase;opacity:.55;font-weight:500;margin-bottom:14px}
+.srow{display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap}
+.sitem{display:flex;flex-direction:column;align-items:center;gap:10px;font-size:12px;opacity:.95}
+.sitem small{opacity:.6;font-size:11px}
+
+/* ---- chrome neutre du site hôte (aucune marque) ---- */
+.host{position:absolute;inset:0;background:#0e1012;color:#d7dadc}
+.h-top{height:56px;border-bottom:1px solid #22262a;display:flex;align-items:center;gap:16px;padding:0 20px}
+.h-mark{width:28px;height:28px;border-radius:8px;background:#2a2f34}
+.h-search{margin:0 auto;width:520px;height:36px;border-radius:18px;background:#1a1d20;display:flex;align-items:center;padding:0 16px;font-size:13px;color:#7c8287}
+.h-av{width:30px;height:30px;border-radius:50%;background:#2a2f34}
+.h-body{display:flex;gap:32px;padding:16px 20px}
+.h-rail{width:228px;display:flex;flex-direction:column;gap:14px;padding-top:6px}
+.sk{height:12px;border-radius:6px;background:#1d2125}
+.h-main{width:760px}
+.h-right{width:316px;border-radius:12px;background:#15181b;padding:16px;display:flex;flex-direction:column;gap:12px;height:280px}
+.p-head{display:flex;align-items:center;gap:10px;font-size:12px;color:#8b9196;margin-bottom:6px}
+.p-av{width:24px;height:24px;border-radius:50%;background:var(--accent);opacity:.9}
+.p-head b{color:#d7dadc;font-weight:600}
+.p-title{font-size:18px;font-weight:600;color:#e8eaed;margin-bottom:12px;letter-spacing:-.01em}
+.p-act{display:flex;gap:10px;margin-top:10px}
+.p-act span{font-size:12px;color:#a3a9ae;background:#1a1d20;border-radius:16px;padding:7px 14px}
+.slot-d{width:760px;height:620px;border-radius:12px;overflow:hidden;position:relative}
+
+.m-status{height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 28px;font-size:14px;font-weight:600}
+.m-status i{display:inline-block;width:18px;height:10px;border-radius:2px;background:#d7dadc;margin-left:6px}
+.m-bar{height:48px;display:flex;align-items:center;gap:12px;padding:0 16px;font-size:14px;font-weight:600;border-bottom:1px solid #22262a}
+.m-bar .chev{width:10px;height:10px;border-left:2px solid #d7dadc;border-bottom:2px solid #d7dadc;transform:rotate(45deg)}
+.m-post{padding:10px 16px 8px}
+.m-post .p-title{font-size:15px;margin:4px 0 0}
+.slot-m{width:390px;height:604px;position:relative;overflow:hidden}
+.m-act{height:48px;display:flex;align-items:center;gap:10px;padding:0 16px;border-top:1px solid #22262a}
+.m-act span{font-size:12px;color:#a3a9ae;background:#1a1d20;border-radius:16px;padding:6px 12px}
+
+/* ---- jeu : structure commune, habillage par direction ---- */
+.game{position:absolute;inset:0;overflow:hidden;background:var(--bg);color:var(--ink)}
+.g-scene{position:absolute;inset:0;pointer-events:none}
+.g-head,.g-board,.g-side{position:relative}
+.g-head{display:flex;justify-content:space-between;align-items:flex-end}
+.g-brand{display:flex;flex-direction:column;gap:4px}
+.g-meta{display:flex;gap:22px}
+.m{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.m-k{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.g-grid{position:relative;display:grid;grid-template-columns:repeat(5,1fr)}
+.g-links{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.cell{position:relative;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer}
+.g-btn{border:0;cursor:pointer;font:inherit}
+.legend{display:flex;gap:18px;font-size:12px;color:var(--mute);align-items:center}
+.legend span{display:flex;align-items:center;gap:8px}
+.stats{display:flex;flex-wrap:wrap;gap:6px 18px;justify-content:space-between;font-size:12px;color:var(--mute)}
+.stats b{color:var(--ink);font-weight:600}
+
+/* desktop : grille à gauche, colonne à droite */
+.L-desk{display:grid;grid-template-columns:440px 1fr;grid-template-rows:auto 1fr;column-gap:36px;padding:28px 32px}
+.L-desk .g-head{grid-column:1/3;margin-bottom:22px}
+.L-desk .g-board{grid-column:1}
+.L-desk .g-side{grid-column:2;display:flex;flex-direction:column;gap:18px;padding-top:4px}
+.L-desk .g-grid{width:440px;gap:var(--gap)}
+/* mobile : empilé */
+.L-mob{display:flex;flex-direction:column;padding:18px 16px 16px;gap:14px}
+.L-mob .g-grid{width:358px;gap:calc(var(--gap) * .7)}
+.L-mob .g-side{display:flex;flex-direction:column;gap:12px;margin-top:auto}
+.L-mob .g-rule{font-size:13px}
+.L-mob .g-head .g-word{font-size:30px}
+.L-mob .legend{display:none}
+
+@keyframes wave{0%{transform:scale(.55);opacity:.85}100%{transform:scale(2.3);opacity:0}}
+@keyframes lift{0%{transform:scale(.9)}60%{transform:scale(1.04)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+
+/* ================= direction : Vallée ================= */
+
+.game{background:radial-gradient(120% 70% at 50% -10%,#14244a 0%,rgba(10,18,38,0) 60%),var(--bg)}
+.g-word{font-size:40px;font-weight:500;letter-spacing:-.04em;line-height:1}
+.g-sub{font-size:12px;color:var(--mute)}
+.m-v{font-size:20px}
+.g-rule{font-size:15px;line-height:1.5;color:#b9c7e2}
+.g-rule b{color:var(--ink);font-weight:600}
+.g-foot{font-size:11px;color:var(--mute);text-align:center}
+.g-btn{height:52px;border-radius:26px;background:var(--lit);color:#0a1226;font-weight:600;font-size:16px;letter-spacing:.01em;
+  box-shadow:0 0 0 1px rgba(255,196,107,.4),0 10px 30px -10px rgba(255,196,107,.55)}
+.g-links line{stroke:var(--lit);stroke-width:.035;stroke-linecap:round;opacity:.55}
+.ant{position:relative;width:62%;height:62%;display:grid;place-items:center;border:2px solid rgba(56,189,248,.6);
+  background:#0d1a33;transition:all .2s}
+.ant.L{border-radius:50%}
+.ant.H{width:54%;height:54%;transform:rotate(45deg);border-radius:6px}
+.ant.H .num{transform:rotate(-45deg)}
+.num{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:22px;font-weight:600;color:#a9bde0;line-height:1}
+.cell.on .ant{background:var(--lit);border-color:var(--lit);box-shadow:0 0 0 4px rgba(255,196,107,.12),0 0 28px 4px rgba(255,196,107,.42)}
+.cell.on .num{color:#0a1226}
+.cell.over .ant{border-style:dashed;border-color:#fff}
+.cell.over .num{color:#fff}
+.cell.met:not(.on) .num{color:var(--ink)}
+.pips{position:absolute;bottom:4%;display:flex;gap:4px;height:6px;align-items:center}
+.pips i{width:5px;height:5px;border-radius:50%;background:#2a3a5c}
+.pips i.f{background:var(--lit)}
+.pips i.x{background:transparent;box-shadow:0 0 0 1.5px #fff}
+.pips .zero{display:none}
+.ring{position:absolute;left:50%;top:50%;width:62%;height:62%;margin:-31% 0 0 -31%;border-radius:50%;border:1.5px solid var(--lit);
+  animation:wave 2.4s cubic-bezier(.2,.6,.3,1) infinite;pointer-events:none}
+.ring:nth-child(2){animation-delay:.3s}.ring:nth-child(3){animation-delay:.6s}
+.cell.fresh .ant{animation:lift .5s ease-out}
+.L-mob .num{font-size:19px}
+.state-cell{width:96px;height:96px;background:var(--bg);border-radius:12px;display:grid;place-items:center;box-shadow:0 0 0 1px #1e2b45}
+.state-cell .cell{width:84px}
+.glyph{display:inline-block;width:12px;height:12px;border:1.5px solid var(--ant)}
+.glyph.L{border-radius:50%}.glyph.H{width:10px;height:10px;transform:rotate(45deg);border-radius:2px}
+.x-toast{display:flex;align-items:center;gap:12px;background:#111c36;border:1px solid #24345a;border-radius:14px;padding:12px 16px;font-size:13px;color:#c9d6ee;width:360px}
+.x-toast b{color:#fff}
+.x-load{width:300px;height:96px;background:var(--bg);border-radius:12px;display:grid;place-items:center;font-family:ui-monospace,Menlo,monospace;color:var(--mute);font-size:13px;box-shadow:0 0 0 1px #1e2b45}
+.x-load span{color:var(--lit)}
+
+</style></head>
+<body><div id="fit"><div class="board">
+  <section class="intro">
+    <div><div class="tag">Signal · page Jeu · planche V1 · 1/3</div><h1>01 — Vallée de nuit</h1></div>
+    <div><p>La direction du brief, poussée vers Igloo : la vallée est la scène, pas un décor. Le fond reste sourd et seules les antennes allumées éclairent ; quand on en allume une, trois anneaux partent et un fil ambré relie les voisines de même fréquence. C'est la plus chaleureuse et la plus « jeu » des trois.</p></div>
+    <div>
+      <div class="tag">Palette · typo · motif</div>
+      <div class="sw"><div><i style="background:#0a1226"></i>Nuit<br><span class="mono">#0a1226</span></div><div><i style="background:#121e3a"></i>Crête<br><span class="mono">#121e3a</span></div><div><i style="background:#1e2b45"></i>Éteint<br><span class="mono">#1e2b45</span></div><div><i style="background:#38bdf8"></i>Antenne<br><span class="mono">#38bdf8</span></div><div><i style="background:#ffc46b"></i>Allumé<br><span class="mono">#ffc46b</span></div><div><i style="background:#dfe7f6"></i>Texte<br><span class="mono">#dfe7f6</span></div></div>
+      <p style="margin-top:12px;font-size:13px">Titre : sans système 40 px, graisse 500, serré (−0,04 em). Compteurs et chiffres : mono, chiffres tabulaires.</p>
+    </div>
+  </section>
+  <div class="frames">
+    <div><div class="flabel">Desktop · 1440 × 900 · post ouvert</div><div class="frame desk" id="desk"></div></div>
+    <div><div class="flabel">Mobile · 390 × 844 · contexte réel du post</div><div class="frame mob" id="mob"></div></div>
+  </div>
+  <section class="states">
+    <h2>États d'une antenne</h2>
+    <div class="srow" id="states"></div>
+    <h2 style="margin-top:28px">États d'interface</h2>
+    <div class="srow" id="extras"></div>
+  </section>
+</div></div>
+<script>
+
+// Réseau du 2026-11-18, tiré de src/shared/puzzle.ts (generatePuzzle).
+const FREQ  = ["ABBAB","AABAA","ABBAB","BBBAA","BABAA"];
+const CLUES = [[1,2,1,2,0],[1,0,1,1,1],[1,3,2,4,0],[1,4,1,1,1],[1,0,1,2,2]];
+// Partie en cours du joueur : 10 antennes allumées, dont une hors solution (B3).
+const PAT   = ["00100","01111","01001","10100","10000"];
+const FRESH = [1,3];               // antenne qu'on vient d'allumer
+const N = 5;
+const on = (r,c) => PAT[r] && PAT[r][c] === "1";
+function curOf(r,c){
+  let n=0; const f=FREQ[r][c];
+  for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){
+    if(!dr&&!dc)continue; const R=r+dr,C=c+dc;
+    if(R<0||C<0||R>=N||C>=N)continue;
+    if(on(R,C)&&FREQ[R][C]===f)n++;
+  }
+  return n;
+}
+const CELLS=[];
+for(let r=0;r<N;r++)for(let c=0;c<N;c++){
+  const t=CLUES[r][c], cur=curOf(r,c);
+  CELLS.push({r,c,band:FREQ[r][c]==="A"?"L":"H",target:t,cur,on:on(r,c),
+    fresh:r===FRESH[0]&&c===FRESH[1],
+    status: cur===t?"met":(cur>t?"over":"under")});
+}
+const TOWERS = CELLS.filter(x=>x.on).length;
+const MATCHED = CELLS.filter(x=>x.status==="met").length;
+// liens : antennes allumées voisines et de même fréquence
+const LINKS=[];
+for(const a of CELLS)for(const b of CELLS){
+  if(!a.on||!b.on||a.band!==b.band)continue;
+  if(b.r*N+b.c<=a.r*N+a.c)continue;
+  if(Math.abs(a.r-b.r)<=1&&Math.abs(a.c-b.c)<=1)LINKS.push([a,b]);
+}
+
+
+function glyph(b){return `<i class="glyph ${b}"></i>`}
+function cell(x){
+  const rings=x.fresh?`<span class="ring"></span><span class="ring"></span><span class="ring"></span>`:"";
+  return `<div class="cell ${x.on?"on":""} ${x.status} ${x.fresh?"fresh":""}" title="${BAND_NAME[x.band]}">
+    ${rings}<div class="ant ${x.band}"><span class="num">${x.target}</span></div>${pips(x,"pips")}</div>`;
+}
+function scene(l){
+  const w=l==="desk"?760:390,h=l==="desk"?620:604;
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" style="position:absolute;inset:0">
+    <path d="M0 ${h*.80} L${w*.18} ${h*.70} L${w*.34} ${h*.78} L${w*.55} ${h*.64} L${w*.74} ${h*.75} L${w} ${h*.66} L${w} ${h} L0 ${h}Z" fill="#0e1830"/>
+    <path d="M0 ${h*.90} L${w*.22} ${h*.83} L${w*.46} ${h*.90} L${w*.68} ${h*.82} L${w} ${h*.89} L${w} ${h} L0 ${h}Z" fill="#111d39"/>
+    ${[[.12,.12],[.3,.06],[.62,.1],[.84,.05],[.93,.18],[.48,.15]].map(([x,y])=>`<circle cx="${w*x}" cy="${h*y}" r="1" fill="#9fb4d9" opacity=".5"/>`).join("")}
+  </svg>`;
+}
+function extras(){
+  return `<div class="sitem"><button class="g-btn" style="width:220px">Transmit</button>Transmit<small>repos</small></div>
+  <div class="sitem"><button class="g-btn" style="width:220px;transform:translateY(1px) scale(.98);box-shadow:0 0 0 1px rgba(255,196,107,.6)">Transmit</button>Pressé<small>scale .98</small></div>
+  <div class="sitem"><div class="x-toast"><span class="glyph H" style="border-color:#fff;border-style:dashed"></span><span><b>Noise.</b> ${25-MATCHED} numbers still disagree. Adjust and transmit again.</span></div>Échec de transmission<small>toast sous la grille, 4 s</small></div>
+  <div class="sitem"><div class="x-load"><div>Receiving signals&nbsp;<span>▮▮▮▮</span>▯▯▯</div></div>Chargement<small>barre en caractères</small></div>`;
+}
+
+
+const BAND_NAME={L:"Low band",H:"High band"};
+function pips(x,cls){
+  if(x.target===0&&x.cur===0)return `<div class="${cls}"><em class="zero">0</em></div>`;
+  let h="";const m=Math.max(x.target,x.cur);
+  for(let i=0;i<m;i++){
+    const k=i<Math.min(x.cur,x.target)?"f":(i<x.target?"e":"x");
+    h+=`<i class="${k}"></i>`;
+  }
+  return `<div class="${cls}">${h}</div>`;
+}
+function grid(){
+  const cells=CELLS.map(x=>cell(x)).join("");
+  const lines=LINKS.map(([a,b])=>`<line x1="${a.c+.5}" y1="${a.r+.5}" x2="${b.c+.5}" y2="${b.r+.5}"/>`).join("");
+  return `<div class="g-grid"><svg class="g-links" viewBox="0 0 5 5" preserveAspectRatio="none">${lines}</svg>${cells}</div>`;
+}
+function game(layout){
+  return `<div class="game L-${layout}">
+    <div class="g-scene">${typeof scene==="function"?scene(layout):""}</div>
+    <header class="g-head">
+      <div class="g-brand"><span class="g-word">Signal</span><span class="g-sub mono">Network 012 · Nov 18</span></div>
+      <div class="g-meta">
+        <div class="m"><span class="m-k">Time</span><span class="m-v mono">02:47</span></div>
+        <div class="m"><span class="m-k">Streak</span><span class="m-v mono">6 days</span></div>
+      </div>
+    </header>
+    <div class="g-board">${typeof gridWrap==="function"?gridWrap(grid()):grid()}</div>
+    <aside class="g-side">
+      <p class="g-rule">Switch towers <b>on</b>. Each number counts the towers on among the 8 cells around it, <b>same frequency only</b>.</p>
+      <div class="legend"><span>${glyph("L")} Low band</span><span>${glyph("H")} High band</span></div>
+      <div class="stats mono"><span>Towers on <b>${TOWERS}</b></span><span>Numbers matched <b>${MATCHED}/25</b></span></div>
+      <button class="g-btn">Transmit</button>
+      <p class="g-foot mono">1,284 operators tuned in today</p>
+    </aside>
+  </div>`;
+}
+function desk(){
+  return `<div class="host">
+    <div class="h-top"><div class="h-mark"></div><div class="h-search">Search</div><div class="h-av"></div></div>
+    <div class="h-body">
+      <div class="h-rail">${[90,70,80,60,0,75,55,85,65].map(w=>w?`<div class="sk" style="width:${w}%"></div>`:`<div style="height:10px"></div>`).join("")}</div>
+      <div class="h-main">
+        <div class="p-head"><span class="p-av"></span><b>r/SignalValley</b> · u/signal-ops · 2h</div>
+        <div class="p-title">Daily network #12 · Nov 18: fix the valley</div>
+        <div class="slot-d">${game("desk")}</div>
+        <div class="p-act"><span>418 comments</span><span>Share</span></div>
+      </div>
+      <div class="h-right">${[50,90,80,85,40,70].map(w=>`<div class="sk" style="width:${w}%"></div>`).join("")}</div>
+    </div></div>`;
+}
+function mob(){
+  return `<div class="host">
+    <div class="m-status"><span>9:41</span><span><i></i><i></i></span></div>
+    <div class="m-bar"><span class="chev"></span>r/SignalValley</div>
+    <div class="m-post"><div class="p-head"><span class="p-av"></span><b>u/signal-ops</b> · 2h</div>
+      <div class="p-title">Daily network #12 · Nov 18: fix the valley</div></div>
+    <div class="slot-m">${game("mob")}</div>
+    <div class="m-act"><span>418 comments</span><span>Share</span></div>
+  </div>`;
+}
+function stateCells(){
+  const S=[
+    [{band:"L",target:2,cur:1,on:false,status:"under"},"Off · low band","number not reached"],
+    [{band:"H",target:2,cur:1,on:false,status:"under"},"Off · high band",""],
+    [{band:"L",target:1,cur:1,on:true,status:"met"},"On","number matched"],
+    [{band:"H",target:3,cur:3,on:true,fresh:true,status:"met"},"Just switched on","waves, 900 ms"],
+    [{band:"L",target:1,cur:2,on:false,status:"over"},"Too many","one tower too many"],
+    [{band:"H",target:0,cur:0,on:false,status:"met"},"Zero","no same-band tower"],
+  ];
+  return S.map(([x,a,b])=>`<div class="sitem"><div class="state-cell">${cell(x)}</div>${a}<small>${b}</small></div>`).join("");
+}
+function fit(){
+  const el=document.getElementById("fit"),s=Math.min(1,window.innerWidth/1950);
+  el.style.transform=`scale(${s})`;document.body.style.height=(el.offsetHeight*s)+"px";
+}
+document.getElementById("desk").innerHTML=desk();
+document.getElementById("mob").innerHTML=mob();
+document.getElementById("states").innerHTML=stateCells();
+document.getElementById("extras").innerHTML=extras();
+window.addEventListener("resize",fit);fit();
+
+</script></body></html>
