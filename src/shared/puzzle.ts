@@ -34,11 +34,9 @@ export type SubmitRequest = {
 export const SIZE = 5;
 const DENSITY = 0.45;
 
-export function dayKeyUTC(now: Date = new Date()): string {
-  return now.toISOString().slice(0, 10);
-}
+export const dayKeyUTC = (now: Date = new Date()): string => now.toISOString().slice(0, 10);
 
-export function dailySeed(day: string): number {
+export const dailySeed = (day: string): number => {
   let hash = 2166136261;
   const input = 'signal:' + day;
   for (let i = 0; i < input.length; i++) {
@@ -46,9 +44,9 @@ export function dailySeed(day: string): number {
     hash = Math.imul(hash, 16777619);
   }
   return hash >>> 0;
-}
+};
 
-export function mulberry32(seed: number): () => number {
+export const mulberry32 = (seed: number): (() => number) => {
   let a = seed >>> 0;
   return () => {
     a |= 0;
@@ -57,9 +55,9 @@ export function mulberry32(seed: number): () => number {
     t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
-}
+};
 
-function neighbors(r: number, c: number, size: number): [number, number][] {
+const neighbors = (r: number, c: number, size: number): [number, number][] => {
   const out: [number, number][] = [];
   for (let dr = -1; dr <= 1; dr++) {
     for (let dc = -1; dc <= 1; dc++) {
@@ -70,29 +68,37 @@ function neighbors(r: number, c: number, size: number): [number, number][] {
     }
   }
   return out;
-}
+};
 
-export function cluesFor(freq: Frequency[][], on: boolean[][]): number[][] {
+const countSameFreqNeighbours = (
+  freq: Frequency[][],
+  on: boolean[][],
+  r: number,
+  c: number
+): number => {
+  const own = freq[r]?.[c];
+  if (!own) return 0;
+  let count = 0;
+  for (const [nr, nc] of neighbors(r, c, freq.length)) {
+    if (on[nr]?.[nc] && freq[nr]?.[nc] === own) count++;
+  }
+  return count;
+};
+
+export const cluesFor = (freq: Frequency[][], on: boolean[][]): number[][] => {
   const size = freq.length;
   const clues: number[][] = [];
   for (let r = 0; r < size; r++) {
     const clueRow: number[] = [];
     for (let c = 0; c < size; c++) {
-      const own = freq[r]?.[c];
-      let count = 0;
-      if (own) {
-        for (const [nr, nc] of neighbors(r, c, size)) {
-          if (on[nr]?.[nc] && freq[nr]?.[nc] === own) count++;
-        }
-      }
-      clueRow.push(count);
+      clueRow.push(countSameFreqNeighbours(freq, on, r, c));
     }
     clues.push(clueRow);
   }
   return clues;
-}
+};
 
-function buildGrid(rand: () => number, size: number): { freq: Frequency[][]; solution: boolean[][] } {
+const buildGrid = (rand: () => number, size: number): { freq: Frequency[][]; solution: boolean[][] } => {
   const freq: Frequency[][] = [];
   const solution: boolean[][] = [];
   for (let r = 0; r < size; r++) {
@@ -106,14 +112,14 @@ function buildGrid(rand: () => number, size: number): { freq: Frequency[][]; sol
     solution.push(solutionRow);
   }
   return { freq, solution };
-}
+};
 
-export function generatePuzzle(day: string, size = SIZE): Puzzle {
+export const generatePuzzle = (day: string, size = SIZE): Puzzle => {
   const { freq, solution } = buildGrid(mulberry32(dailySeed(day)), size);
   return { day, size, freq, clues: cluesFor(freq, solution) };
-}
+};
 
-export function isSolved(puzzle: Puzzle, pattern: boolean[][]): boolean {
+export const isSolved = (puzzle: Puzzle, pattern: boolean[][]): boolean => {
   const got = cluesFor(puzzle.freq, pattern);
   for (let r = 0; r < puzzle.size; r++) {
     for (let c = 0; c < puzzle.size; c++) {
@@ -121,9 +127,7 @@ export function isSolved(puzzle: Puzzle, pattern: boolean[][]): boolean {
     }
   }
   return true;
-}
+};
 
-export function solutionOf(puzzle: Puzzle): boolean[][] {
-  const { solution } = buildGrid(mulberry32(dailySeed(puzzle.day)), puzzle.size);
-  return solution;
-}
+export const solutionOf = (puzzle: Puzzle): boolean[][] =>
+  buildGrid(mulberry32(dailySeed(puzzle.day)), puzzle.size).solution;
